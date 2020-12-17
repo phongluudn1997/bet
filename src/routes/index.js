@@ -7,7 +7,7 @@ router.get("/", function (req, res) {
 })
 
 router.get("/error", (req, res) => {
-  throw new BadRequestError("dfdf")
+  throw new BadRequestError("Pass anything")
 })
 
 module.exports = router
