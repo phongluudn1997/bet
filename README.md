@@ -1,0 +1,3 @@
+- The callback function in router should be wrapped in asyncHandler to catch error
+- plugin required:
+  - prettier
