@@ -1,5 +1,7 @@
 const testChat = require("./test-chat")
+const gameBet = require("./game-bet")
 
 module.exports = {
-  testChat,
+    gameBet,
+    testChat,
 }
