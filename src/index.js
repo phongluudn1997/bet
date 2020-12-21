@@ -1,4 +1,4 @@
-const app = require("./app")
+const http = require("./app")
 const mongoose = require("mongoose")
 const config = require("./config")
 const DB_URL = config.dbUrl
@@ -17,6 +17,6 @@ const DB_URL = config.dbUrl
 })()
 
 const port = config.port || 3000
-app.listen(port, () => {
+http.listen(port, () => {
   console.log(`App is running on port ${port}`)
 })

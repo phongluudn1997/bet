@@ -1,5 +1,13 @@
 html
   head
-    title= title
+    title testSocket
+    script(src="/socket.io/socket.io.js")
   body
     h1= message
+    ul(id='events')
+    script.
+      console.log("Javascript in PUG")
+      const socket = io('/test-chat');
+      socket.on('connect', () => {
+        console.log("connected")
+      });
