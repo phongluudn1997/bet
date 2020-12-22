@@ -24,9 +24,7 @@ const gameBet = io => {
         res.game_state = gameManager.state
         res.startTime = gameManager.startTime
         res.players = playersManager.getPlayers()
-        res.forcePoint = gameManager.forcePoint
         res.max_bet_profit = gameManager.max_bet_profit
-        // res.profit_percent = gameManager.profit_percent;
 
         clientSocket.emit("game_status", res)
         try {
@@ -46,16 +44,13 @@ const gameBet = io => {
             emitUsersOnline()
         })
 
-        clientSocket.on("place_bet", ({ amount, autoCashOut }, cb) => {
+        clientSocket.on("place_bet", ({ amount, prediction }, cb) => {
             if (!lib.isInt(amount)) {
                 return sendError(
                     clientSocket,
                     "[place_bet] No invest amount: " + amount
                 )
             }
-            // if (amount <= 0 || !lib.isInt(amount / 100)) {
-            //     return sendError(clientSocket, '[place_bet] Must place a bet in multiples of 100, got: ' + amount);
-            // }
 
             if (amount > 1e8)
                 // 1 BTC limit
@@ -64,14 +59,11 @@ const gameBet = io => {
                     "[place_bet] Max bet size is 1 BTC got: " + amount
                 )
 
-            if (!autoCashOut)
+            if (!prediction)
                 return sendError(
                     clientSocket,
-                    "[place_bet] Must Send an autocashout with a bet"
+                    "[place_bet] Must send a prediction! Green: 0, Red: 1"
                 )
-
-            // else if (!lib.isInt(autoCashOut) || autoCashOut < 100)
-            //     return sendError(clientSocket, '[place_bet] auto_cashout problem ' + autoCashOut);
 
             if (typeof cb !== "function")
                 return sendError(clientSocket, "[place_bet] No cb")
@@ -151,14 +143,13 @@ const gameBet = io => {
 
     io.on("connection", clientSocket => {
         let jwtUser = {}
-        try {
-            console.log("socket")
-            jwtUser = pareJwtToken(clientSocket.handshake.query.token)
-        } catch (er) {
-            console.log("USER HAVE NOT LOGIN")
+        jwtUser = pareJwtToken(clientSocket.handshake.query.token)
+        console.log("Handshake with client, get Jwt", jwtUser)
+        if (!jwtUser) {
+            console.log("User is not login")
         }
         listen(clientSocket, jwtUser)
-        gameManager.resume()
+        // gameManager.resume()
     })
 
     function emitUsersOnline(cb = () => null) {
