@@ -17,6 +17,7 @@ const PORT = config.PORT
     })
 })()
 
-http.listen(port, () => {
+console.log(config)
+http.listen(PORT, () => {
     console.log(`App is running on port ${PORT}`)
 })

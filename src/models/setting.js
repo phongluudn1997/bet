@@ -198,4 +198,4 @@ SettingsSchema.statics.getMigrateData = function () {
     return dataMigrate
 }
 
-module.exports = mongoose.model("Setting", SettingsSchema)
+module.exports = mongoose.model("Setting", SettingsSchema, "setting")

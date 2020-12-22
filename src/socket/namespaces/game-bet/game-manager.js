@@ -9,10 +9,10 @@ const TOP3_ALGORITHMS = [
 ]
 
 const Game = require("../../../models/game")
-const Coefficient = require("../../../models/coefficients")
+const Coefficient = require("../../../models/coefficient")
 const GamePlayer = require("../../../models/game_player")
 const User = require("../../../models/user")
-const Setting = require("../../../models/settings")
+const Setting = require("../../../models/setting")
 const SHA256 = require("crypto-js/sha256")
 const lib = require("../../../utils/lib")
 
@@ -27,9 +27,8 @@ const {
     formatPlayersAtClientSide,
     isBot,
 } = require("./game-utils")
-const { migrate } = require("../../../../database/migrations/resetDB")
 
-const config = require("../../../../config")
+const config = require("../../../config")
 
 // services
 const { ProfitService } = require("../../../services")
@@ -155,128 +154,6 @@ function GameManager(io, playersManager) {
                 })
         })
 
-    const getSetting = () =>
-        new Promise((rs, rj) => {
-            Setting.find({}).exec(async (er, doc) => {
-                if (er || doc == null) {
-                    rj("ERROR GET SETTING" + er.message)
-                } else {
-                    const settingData = toJsonObject(doc, "name")
-                    console.log({ settingData })
-                    const {
-                        // config
-                        pools,
-                        bots_config,
-
-                        // common algorithms
-                        looper_crash_all,
-                        shark_algorithm,
-
-                        // v2 algorithms
-                        balance_algorithm,
-                        suction_algorithm,
-                        discharge_algorithm,
-
-                        // stuff
-                        max_bet_profit,
-                    } = settingData
-
-                    // config and common algorithms
-                    self.algorithms = {
-                        ...self.algorithms,
-                        pools: {
-                            ...self.algorithms.pools,
-                            ...pools.value,
-                        },
-                        looper_crash_all: {
-                            ...self.algorithms.looper_crash_all,
-                            ...looper_crash_all.value,
-                        },
-                        shark_algorithm: {
-                            ...self.algorithms.shark_algorithm,
-                            ...shark_algorithm.value,
-                            average_total_bet: await getAverageHistories(5),
-                        },
-                        bots_config: {
-                            ...self.algorithms.bots_config,
-                            ...bots_config.value,
-                        },
-                        applied_algorithm:
-                            TOP3_ALGORITHMS[
-                                randInt(1, 100) <=
-                                +discharge_algorithm.value.ratio_random * 100
-                                    ? 2
-                                    : randInt(0, 1)
-                            ],
-                        // applied_algorithm: TOP3_ALGORITHMS[0],
-                        // "BALACE_ALGORITHM", "SUCTION_ALGORITHM", "DISCHARGE_ALGORITHM"
-                    }
-
-                    // others
-                    self.max_bet_profit = max_bet_profit.value
-
-                    bots_top_to_down_number = randInt(
-                        1,
-                        self.getCurrentLooperBots()
-                    )
-
-                    let game_info = self.algorithms.game_info
-
-                    switch (self.algorithms.applied_algorithm) {
-                        case "BALACE_ALGORITHM": {
-                            game_info = {
-                                ...game_info,
-                                fee_taken: 3,
-                                discharge_coins: 0,
-                                suction_ratio: 0,
-                            }
-                            break
-                        }
-                        case "SUCTION_ALGORITHM": {
-                            game_info = {
-                                ...game_info,
-                                fee_taken: 3,
-                                discharge_coins: 0,
-                                suction_ratio: +suction_algorithm.value.ratio,
-                            }
-                            break
-                        }
-                        case "DISCHARGE_ALGORITHM": {
-                            game_info = {
-                                ...game_info,
-                                fee_taken: 3,
-                                discharge_coins: getDischargeCoins(
-                                    pools.value.discharge_pool,
-                                    discharge_algorithm.value
-                                ),
-                                suction_ratio: 0,
-                            }
-                            break
-                        }
-                    }
-
-                    self.algorithms.game_info = game_info
-
-                    // V2 algorithm config
-                    self.algorithms_v2 = {
-                        ...self.algorithms_v2,
-                        balance_algorithm: balance_algorithm.value,
-                        suction_algorithm: suction_algorithm.value,
-                        discharge_algorithm: discharge_algorithm.value,
-                    }
-
-                    // Set Apply algorithm if v3 algorithm is actived
-                    if (self.algorithms_v3.is_actived) {
-                        // will think about this later.
-                    }
-
-                    self.controllerIsRunning = settingData.game_is_running.value
-
-                    rs(true)
-                }
-            })
-        })
-
     const autoBetBots = (cur = 0, bots = []) => {
         if (bots[cur] && self.state == "STARTING") {
             io.emit("bet", {
@@ -378,7 +255,6 @@ function GameManager(io, playersManager) {
                 bets: bets,
             })
 
-            self.setForcePoint()
             scheduleNextTick(0)
         } catch (er) {
             console.log("ERR", er)
@@ -436,8 +312,6 @@ function GameManager(io, playersManager) {
             profit_discharge_pool: discharge_pool_inc,
             crash_at,
             bonus: toal_bonus,
-            algorithm,
-            pools: self.algorithms.pools,
             gamming_calculation: {
                 game_info,
                 total_won,
@@ -549,110 +423,6 @@ function GameManager(io, playersManager) {
         }
     }
 
-    const handleAdminCrash = () => {
-        /**
-         * Admin crash will take config.GAME_FEES to profit pool
-         * Excess cash will go to discharge pool
-         */
-        // New algorithm
-        const elapsed = new Date() - self.startTime
-        self.forcePoint = growthFunc(elapsed)
-        self.algorithms.applied_algorithm = "ADMIN_CRASH"
-        return
-    }
-
-    const handleLooperCrash = () => {
-        /**
-         * All excess cash will go to discharge wallet
-         */
-        let { points } = self.algorithms.looper_crash_all
-        if (points.length > 0) {
-            self.forcePoint = points[randInt(0, points.length - 1)]
-        } else {
-            self.forcePoint = config.MIN_CASH_OUT // Admin had forgot set points to order completed so crash -> 1.00x
-        }
-        self.algorithms.applied_algorithm = "LOOPER_CRASH"
-        return
-    }
-
-    const handleKillShark = () => {
-        // System take config.GAME_FEES and excess cash will go to discharge wallet
-        let { crash_at } = self.algorithms.shark_algorithm
-        self.forcePoint = crash_at
-        self.algorithms.applied_algorithm = "SHARK_ALGORITHM"
-        return
-    }
-
-    const checkCommonAlgorithms = cb => {
-        // 1. Check admin crash all
-        if (self.algorithms.is_admin_crash) {
-            handleAdminCrash()
-            return true
-        }
-
-        //tringuyen
-        // 2. Check shark
-        // const shark = playersManager.findPlayer(player => +player.bet >= 1000000);
-        // console.log("lalala",playersManager);
-        // if (shark) {
-        //   handleKillShark();
-        //   return true;
-        // }
-
-        let { average_total_bet, time_rate } = self.algorithms.shark_algorithm
-        if (time_rate === 0 || average_total_bet === 0) return false
-        if (playersManager.getTotalBet() > average_total_bet * time_rate) {
-            handleKillShark()
-            return true
-        }
-
-        // 3. Check loop crash all
-        let { arr, current } = self.algorithms.looper_crash_all
-        if (arr.indexOf(+current) > -1) {
-            console.log(current, "auto")
-            handleLooperCrash() // crash all player at 0.00x
-            return true
-        }
-
-        return false
-    }
-
-    self.setForcePoint = (cb = () => {}) => {
-        /**
-         * 1. check common algorithm
-         * 2. Random 3 main algorithms
-         *
-         */
-        // 1. check comon algorithm
-        // ramdomCoefficient();
-
-        if (!self.autogame) {
-            if (self.algorithms.is_admin_crash) {
-                handleAdminCrash()
-                return true
-            }
-            self.forcePoint = self.coefficient
-        } else {
-            if (checkCommonAlgorithms()) {
-                return
-            }
-            self.forcePoint = Math.max(
-                self.ramdomMax,
-                getMaxCrashPoint({
-                    players: playersManager.players,
-                    discharge_coins: self.algorithms.game_info.discharge_coins,
-                    suction_ratio: self.algorithms.game_info.suction_ratio,
-                    bots_top_to_down_number,
-                })
-            )
-        }
-
-        //tringuyen
-        // self.forcePoint = 200;
-        // console.log(self.algorithms.applied_algorithm);
-        // console.log(self.forcePoint);
-    }
-
     self.cashOut = (user, callback) => {
         if (self.state !== "IN_PROGRESS")
             return callback("GAME_NOT_IN_PROGRESS")
@@ -683,7 +453,6 @@ function GameManager(io, playersManager) {
         clearTimeout(self.tickTimer)
 
         self.doCashOut(player, at, "CASHED_OUT", callback)
-        self.setForcePoint()
         io.emit("cashed_out", player)
         self.runTick()
     }
@@ -928,14 +697,7 @@ function GameManager(io, playersManager) {
         console.warn("Game is going to pause")
         self.controllerIsRunning = false
     }
-    // Admin reset DB
-    self.resetDB = data => {
-        try {
-            migrate()
-        } catch (err) {
-            console.log("SETTING ERROR", err.message)
-        }
-    }
+
     // Admin edit Algorithm
 
     self.editAlgorithm = async data => {

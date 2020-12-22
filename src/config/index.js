@@ -1,12 +1,11 @@
 const dotenv = require("dotenv")
-const __DEV__ = require("./env/development")
-const __PRO__ = require("./env/production")
-const __STG__ = require("./env/staging")
-
 const envFound = dotenv.config()
 if (!envFound) {
     throw Error("Couln't find .env file!")
 }
+const __DEV__ = require("./env/development")
+const __PRO__ = require("./env/production")
+const __STG__ = require("./env/staging")
 
 const defaults = {
     GAME_FEES: 0,
