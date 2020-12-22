@@ -211,8 +211,14 @@ const AUTO_BET_SCRIPTS = [
     },
 ]
 
+const GAME_RESULT = {
+    GREEN: 0,
+    RED: 1,
+}
+
 module.exports = {
     ENGLISH_NAMES,
     RATIO_FEES_GAME,
     AUTO_BET_SCRIPTS,
+    GAME_RESULT,
 }
