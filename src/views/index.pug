@@ -1,13 +1,24 @@
 html
-  head
-    title testSocket
-    script(src="/socket.io/socket.io.js")
-  body
-    h1= message
-    ul(id='events')
-    script.
-      console.log("Javascript in PUG")
-      const socket = io('/game-bet');
-      socket.on('connect', () => {
-        console.log("connected")
-      });
+    head
+        title testSocket
+        script(src="/socket.io/socket.io.js")
+    body
+        h1= message
+        ul(id='events')
+        script.
+            console.log("Javascript in PUG")
+            const ul = document.getElementById("events")
+
+            const addToList = what => {
+                const li = document.createElement("li")
+                li.appendChild(document.createTextNode(what))
+                ul.appendChild(li)
+            }
+
+            const socket = io('/game-bet');
+            socket.on('connect', () => addToList(`create socket with id: ${socket.id}`));
+            socket.on('connected', () => addToList("user join room"))
+            socket.on('game_status', res => addToList(`game status: ${JSON.stringify(res)}`))
+            socket.on('top-histories', histories => addToList(`top history: ${JSON.stringify(histories)}`))
+            socket.on('disconnect', () => addToList("user out room"))
+            socket.on('place_bet', ({amount, autoCashOut}))
