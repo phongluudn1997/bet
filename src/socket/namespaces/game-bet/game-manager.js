@@ -20,8 +20,6 @@ const { toJsonObject, randInt } = require("../../../utils/func")
 
 const {
     growthFunc,
-    getMaxCrashPoint,
-    getDischargeCoins,
     getProfitPoolInc,
     getDischargePoolInc,
     formatPlayersAtClientSide,
