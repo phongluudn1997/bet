@@ -2,14 +2,22 @@ const lib = require("../../utils/lib")
 const pareJwtToken = require("../../utils/func").pareJwtToken
 const User = require("../../models/user")
 const Setting = require("../../models/setting")
+const { GAME_RESULT } = require("../../utils/constant")
 
-const { GameManager, PlayersManager } = require("./game-bet/index")
+const {
+    GameManager,
+    PlayersManager,
+    Game,
+    Player,
+} = require("./game-bet/index")
 
 const gameBet = io => {
     let usersSocket = {}
     let playersManager = new PlayersManager()
 
     let gameManager = new GameManager(io, playersManager)
+    const game = new Game(io)
+    game.start()
 
     const joined = async (clientSocket, jwtUser) => {
         usersSocket[clientSocket.id] = jwtUser
@@ -57,28 +65,34 @@ const gameBet = io => {
                 return sendError(
                     clientSocket,
                     "[place_bet] Max bet size is 1 BTC got: " + amount
-                )
+                ).placeBet({ amount, prediction })
 
-            if (!prediction)
-                return sendError(
-                    clientSocket,
-                    "[place_bet] Must send a prediction! Green: 0, Red: 1"
-                )
+            game.placeBet({ _id: 1 }, amount, prediction)
+
+            clientSocket.emit("betted", {
+                amount,
+                prediction: GAME_RESULT[prediction],
+            })
 
             if (typeof cb !== "function")
                 return sendError(clientSocket, "[place_bet] No cb")
 
-            gameManager.placeBet(jwtUser, amount, autoCashOut, err => {
-                if (err) {
-                    if (typeof err === "string") cb(err)
-                    else {
-                        // console.error('[INTERNAL_ERROR] unable to place bet, got: ', err);
-                        cb("INTERNAL_ERROR")
-                    }
-                    return
-                }
-                cb(null) // TODO: ... deprecate
-            })
+            // gameManager.placeBet(jwtUser, amount, autoCashOut, err => {
+            //     if (err) {
+            //         if (typeof err === "string") cb(err)
+            //         else {
+            //             // console.error('[INTERNAL_ERROR] unable to place bet, got: ', err);
+            //             cb("INTERNAL_ERROR")
+            //         }
+            //         return
+            //     }
+            //     cb(null) // TODO: ... deprecate
+            // })
+        })
+
+        clientSocket.on("stop-game", () => {
+            game.stop()
+            clientSocket.emit("game-stopped")
         })
 
         clientSocket.on("cash_out", ack => {

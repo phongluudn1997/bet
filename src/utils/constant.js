@@ -212,8 +212,8 @@ const AUTO_BET_SCRIPTS = [
 ]
 
 const GAME_RESULT = {
-    GREEN: 0,
-    RED: 1,
+    0: "GREEN",
+    1: "RED",
 }
 
 module.exports = {

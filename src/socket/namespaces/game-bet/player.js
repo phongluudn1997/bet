@@ -1,11 +1,25 @@
-const { GameManager } = require("./game")
-
 class Player {
-    _gameManager
-    constructor() {
-        this._gameManager = new GameManager()
+    constructor({ game, user }) {
+        this.game = game
     }
-    async placeBet() {}
+    async cancelBet() {}
 }
 
-module.exports = Player
+class BotPlayer extends Player {
+    constructor(game) {
+        super(game)
+    }
+}
+
+class UserPlayer extends Player {
+    constructor(game, user) {
+        super(game)
+        this.user = user
+    }
+}
+
+module.exports = {
+    Player,
+    BotPlayer,
+    UserPlayer,
+}

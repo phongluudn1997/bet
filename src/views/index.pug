@@ -5,6 +5,8 @@ html
     body
         h1= message
         ul(id='events')
+        button(type='button' onclick='place_bet("'+ 3 +'")' ) PressMe
+        button(type='button' onclick="stopGame()") Stop Game
         script.
             console.log("Javascript in PUG")
             const ul = document.getElementById("events")
@@ -15,10 +17,24 @@ html
                 ul.appendChild(li)
             }
 
+
+            function place_bet(number){
+                console.log(socket)
+                socket.emit("place_bet", {amount: 3, prediction: 0}, function(arg){
+                    console.log(arg)
+                })
+            }
+
+            function stopGame(){
+                socket.emit("stop-game")
+            }
+
             const socket = io('/game-bet');
             socket.on('connect', () => addToList(`create socket with id: ${socket.id}`));
             socket.on('connected', () => addToList("user join room"))
             socket.on('game_status', res => addToList(`game status: ${JSON.stringify(res)}`))
             socket.on('top-histories', histories => addToList(`top history: ${JSON.stringify(histories)}`))
             socket.on('disconnect', () => addToList("user out room"))
-            socket.on('place_bet', ({amount, autoCashOut}))
+            socket.on('betted', ({amount, prediction}) => addToList(`User bet ${amount} on ${prediction}`))
+            socket.on("tick", (tick, state) => addToList(`${tick} ${state}`))
+            socket.on('game-stopped', () => addToList('Game stopped'))
