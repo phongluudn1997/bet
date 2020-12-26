@@ -1,6 +1,7 @@
 const express = require("express")
 const bodyParser = require("body-parser")
 const cors = require("cors")
+const cookieSession = require("cookie-session")
 
 const socket = require("./socket")
 const { handleError } = require("./middlewares")
@@ -16,6 +17,14 @@ app.set("views", "src/views")
 app.set("view engine", "pug")
 
 app.use(cors())
+
+app.use(
+    cookieSession({
+        name: "session",
+        keys: ["secret-key"],
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+    })
+)
 
 app.use(
     bodyParser.json({

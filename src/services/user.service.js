@@ -8,50 +8,49 @@ const jwt = require("jsonwebtoken")
 const SALT = 10
 
 class UserService {
-  userModel
-  constructor(userModel) {
-    this.userModel = userModel
-  }
-
-  async register(userRegisterDTO) {
-    const { email, password, nickname } = userRegisterDTO
-    const existedUser = await this.userModel.findOne({ email }).exec()
-    if (existedUser) {
-      throw new BadRequestError("Email registered!")
+    userModel
+    constructor(userModel) {
+        this.userModel = userModel
     }
 
-    const salt = randomBytes(32)
-    const hashedPassword = await bcrypt.hash(password, SALT)
-    let user = await this.userModel.create({
-      email,
-      salt: salt.toString("hex"),
-      password: hashedPassword,
-      nickname,
-    })
+    async register(userRegisterDTO) {
+        const { email, password, nickname } = userRegisterDTO
+        const existedUser = await this.userModel.findOne({ email }).exec()
+        if (existedUser) {
+            throw new BadRequestError("Email registered!")
+        }
 
-    return user
-  }
+        const salt = randomBytes(32)
+        const hashedPassword = await bcrypt.hash(password, SALT)
+        let user = await this.userModel.create({
+            email,
+            salt: salt.toString("hex"),
+            password: hashedPassword,
+            nickname,
+        })
 
-  async login(userLoginDTO) {
-    const { email, password } = userLoginDTO
-
-    const user = await this.userModel.findOne({ email }).exec()
-    if (!user) {
-      throw new BadRequestError("The email hasn't been registered!")
+        return user
     }
 
-    const match = await bcrypt.compare(password, user.password)
-    if (!match) {
-      throw new BadRequestError("Wrong password!")
+    async login(userLoginDTO) {
+        const { email, password } = userLoginDTO
+
+        const user = await this.userModel.findOne({ email }).exec()
+        if (!user) {
+            throw new BadRequestError("The email hasn't been registered!")
+        }
+
+        const match = await bcrypt.compare(password, user.password)
+        if (!match) {
+            throw new BadRequestError("Wrong password!")
+        }
+
+        return user
     }
 
-    const token = await this.generateToken({ _id: user._id })
-    return token
-  }
-
-  async generateToken(payload) {
-    return await jwt.sign(payload, jwtSecret)
-  }
+    async generateToken(payload) {
+        return await jwt.sign(payload, jwtSecret)
+    }
 }
 
 module.exports = UserService

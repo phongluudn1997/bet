@@ -1,0 +1,8 @@
+p Register Form
+    form(action='/register' method='POST')
+        p
+            | email: 
+            input(type='text' name='email' value='')
+            | pasword: 
+            input(type='password' name='password' value='')
+        input(type='submit' value='Submit')
