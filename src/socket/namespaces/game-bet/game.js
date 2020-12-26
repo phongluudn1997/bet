@@ -6,21 +6,22 @@ class Game {
     _timer = 0
     _winners = []
     _losers = []
-    _paid = false
     _timerInterval = setInterval(() => {
-        if (this._state === "PAY_MONEY" && this._timer === 5) {
+        if (this._state === "PAY_MONEY" && this._timer === 3) {
+            this._players = {}
+            this._winners = []
+            this._losers = []
             this._timer = 0
-            this._paid = false
             this._state = "BETTING"
         }
-        if (this._state === "BETTING" && this._timer === 15) {
+        if (this._state === "BETTING" && this._timer === 3) {
             this._timer = 0
             this._state = "RESULT_CALCULATING"
         }
-        if (this._state === "RESULT_CALCULATING" && this._timer === 10) {
+        if (this._state === "RESULT_CALCULATING" && this._timer === 3) {
             this._timer = 0
             this._state = "PAY_MONEY"
-            !this._paid && this.payMoney()
+            this.payMoney()
         }
         this._timer++
         this._io.emit("tick", this._timer, this._state)
@@ -58,7 +59,6 @@ class Game {
                 this._losers.push({ [playerId]: betAmount })
             } else this._winners.push({ [playerId]: betAmount })
         }
-        this.paid = true
         console.log(this._winners, this._losers)
     }
 
