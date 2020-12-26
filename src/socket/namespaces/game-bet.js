@@ -67,7 +67,11 @@ const gameBet = io => {
                     "[place_bet] Max bet size is 1 BTC got: " + amount
                 ).placeBet({ amount, prediction })
 
-            game.placeBet({ _id: 1 }, amount, prediction)
+            game.placeBet(
+                { _id: 1000, username: "Phong Luu" },
+                amount,
+                prediction
+            )
 
             clientSocket.emit("betted", {
                 amount,

@@ -1,4 +1,5 @@
 const { BotPlayer } = require("./player")
+const BOTS = require("./bots")
 
 class Game {
     _state = "IDLE" // 'IDLE' || 'BETTING' || 'RESULT_CALCULATING' || 'PAY_MONEY'
@@ -13,6 +14,7 @@ class Game {
             this._losers = []
             this._timer = 0
             this._state = "BETTING"
+            this.createBots()
         }
         if (this._state === "BETTING" && this._timer === 3) {
             this._timer = 0
@@ -31,10 +33,14 @@ class Game {
         this._io = io
     }
 
-    createBots(number) {
-        for (let i = 0; i < number; i++) {
-            this._players.push(new BotPlayer())
-        }
+    createBots() {
+        BOTS.forEach(bot =>
+            this.placeBet(
+                bot,
+                Math.floor(Math.random() * 10),
+                this.calculateResult()
+            )
+        )
     }
 
     placeBet(user, betAmount, prediction) {
@@ -43,28 +49,28 @@ class Game {
             return
         }
         this._players[user._id] = { ...user, betAmount, prediction }
-        console.log(this._players)
     }
 
     calculateResult() {
-        const result = Math.floor(Math.random() * 2)
-        return result
+        return Math.floor(Math.random() * 2)
     }
 
     payMoney() {
         const result = this.calculateResult()
         for (let playerId in this._players) {
-            const { betAmount, prediction } = this._players[playerId]
+            const { betAmount, prediction, username } = this._players[playerId]
             if (prediction !== result) {
-                this._losers.push({ [playerId]: betAmount })
-            } else this._winners.push({ [playerId]: betAmount })
+                this._losers.push({ [username]: betAmount })
+            } else this._winners.push({ [username]: betAmount })
         }
+        this._io.emit("game-result", {
+            winners: this._winners,
+            losers: this._losers,
+        })
         console.log(this._winners, this._losers)
     }
 
     start() {
-        // this.createBots(30)
-        console.log(this._players)
         this._state = "BETTING"
         this._timerInterval
     }

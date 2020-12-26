@@ -1,17 +1,19 @@
 class Player {
-    constructor() {}
+    constructor(user) {
+        this.user = user
+    }
     async cancelBet() {}
 }
 
 class BotPlayer extends Player {
-    constructor() {
-        super()
+    constructor(user) {
+        super(user)
     }
 }
 
 class UserPlayer extends Player {
     constructor(user) {
-        super()
+        super(user)
     }
 }
 
