@@ -67,7 +67,6 @@ class Game {
             winners: this._winners,
             losers: this._losers,
         })
-        console.log(this._winners, this._losers)
     }
 
     start() {
