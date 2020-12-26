@@ -38,3 +38,4 @@ html
             socket.on('betted', ({amount, prediction}) => addToList(`User bet ${amount} on ${prediction}`))
             socket.on("tick", (tick, state) => addToList(`${tick} ${state}`))
             socket.on('game-stopped', () => addToList('Game stopped'))
+            socket.on('game-result', ({winners, losers}) => addToList(`Winners: ${JSON.stringify(winners)}, Losers: ${JSON.stringify(losers)}`))
