@@ -2,7 +2,8 @@ const { BadRequestError } = require("../common/errors")
 const { randomBytes } = require("crypto")
 const bcrypt = require("bcrypt")
 
-const { jwtSecret } = require("../config")
+const { SECRET } = require("../config")
+const { JWT_SECRET } = SECRET
 const jwt = require("jsonwebtoken")
 
 const SALT = 10
@@ -45,11 +46,13 @@ class UserService {
             throw new BadRequestError("Wrong password!")
         }
 
-        return user
+        const token = this.generateToken(user.toJSON())
+
+        return { user, token }
     }
 
-    async generateToken(payload) {
-        return await jwt.sign(payload, jwtSecret)
+    generateToken(payload) {
+        return jwt.sign(payload, JWT_SECRET)
     }
 }
 

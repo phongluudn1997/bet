@@ -7,12 +7,11 @@ const renderPageLogin = (req, res) => {
 }
 
 const login = asyncHandler(async (req, res, next) => {
-    console.log(req.body)
     const userServiceInstance = new UserService(userModel)
-    const user = await userServiceInstance.login(req.body)
+    const { user, token } = await userServiceInstance.login(req.body)
     req.session.userAuth = user
-    console.log(req.session.userAuth)
-    return res.redirect("/")
+    req.session.token = token
+    res.redirect("/game")
 
     // res.json({
     //     message: "Login successfully!",

@@ -4,11 +4,33 @@ html
         script(src="/socket.io/socket.io.js")
     body
         h1= message
+        h1= userAuth._id
+        p= token
         ul(id='events')
         button(type='button' onclick='place_bet("'+ 3 +'")' ) PressMe
         button(type='button' onclick="stopGame()") Stop Game
         script.
-            console.log("Javascript in PUG")
+            //- const userId = userAuth ? userAuth._id : ''
+            //- const userName = userAuth ? userAuth.username : ''
+            //- const jwt_token =  token ? token : '';
+            //- console.log(userId, userName, jwt_token)
+            const userAuth = "#{JSON.stringify(userAuth)}"
+            const {_id} = userAuth
+            const token = "#{token}"
+            console.log(userAuth)
+            const ConnectSocket = (game, namespace) => {
+                game(
+                {
+                    userId,
+                    userName,
+                },
+                jwt_token
+                ).connect(
+                io(namespace, {
+                    query: "token=" + jwt_token,
+                })
+                );
+            };
             const ul = document.getElementById("events")
 
             const addToList = what => {

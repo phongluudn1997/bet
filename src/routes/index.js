@@ -5,9 +5,7 @@ const router = express.Router()
 const userRouter = require("./user")
 const clientRouter = require("./client")
 
-router.get("/", function (req, res) {
-    res.render("index", { title: "Hey", message: "Hello there!" })
-})
+router.get("/", (req, res) => res.render("index", { aaa: "Hello World" }))
 
 router.use("/", clientRouter)
 
