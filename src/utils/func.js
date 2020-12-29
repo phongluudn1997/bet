@@ -11,7 +11,7 @@ const jwtToken = (data = {}) => {
 
 const pareJwtToken = token => {
     try {
-        return jwt.verify(token, config.SESSION.jwtSecret)
+        return jwt.verify(token, config.SECRET.JWT_SECRET)
     } catch {
         return null
     }

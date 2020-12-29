@@ -162,7 +162,6 @@ const gameBet = io => {
     io.on("connection", clientSocket => {
         let jwtUser = {}
         jwtUser = pareJwtToken(clientSocket.handshake.query.token)
-        console.log(jwtUser)
         if (!jwtUser) {
             console.log("User is not login")
         }

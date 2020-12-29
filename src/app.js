@@ -14,7 +14,7 @@ const io = require("socket.io")(http)
 socket(io)
 
 app.set("views", "src/views")
-app.set("view engine", "pug")
+app.set("view engine", "ejs")
 
 app.use(cors())
 
