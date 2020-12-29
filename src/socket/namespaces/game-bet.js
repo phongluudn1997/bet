@@ -165,6 +165,7 @@ const gameBet = io => {
         if (!jwtUser) {
             console.log("User is not login")
         }
+        console.log("User", jwtUser)
         listen(clientSocket, jwtUser)
         // gameManager.resume()
     })
