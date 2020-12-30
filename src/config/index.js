@@ -1,3 +1,4 @@
+const path = require("path")
 const dotenv = require("dotenv")
 const envFound = dotenv.config()
 if (!envFound) {
@@ -9,6 +10,7 @@ const __STG__ = require("./env/staging")
 
 const defaults = {
     GAME_FEES: 0,
+    PATH_MODELS: path.join(__dirname, "../models"),
     DATABASE: {
         DATABASE_NAME: process.env.DATABASE_NAME,
         DATABASE_URL: process.env.DATABASE_URL,

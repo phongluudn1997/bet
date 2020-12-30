@@ -1,4 +1,4 @@
-const { BotPlayer } = require("./player")
+const User = require("../../../models/user")
 const BOTS = require("./bots")
 
 class Game {
@@ -33,7 +33,9 @@ class Game {
         this._io = io
     }
 
-    createBots() {
+    async createBots() {
+        const users = await User.find({ type: "BOT" })
+        console.log(users)
         BOTS.forEach(bot =>
             this.placeBet(
                 bot,
