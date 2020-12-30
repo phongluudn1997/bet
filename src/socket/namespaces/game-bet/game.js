@@ -34,7 +34,7 @@ class Game {
     }
 
     async createBots() {
-        const users = await User.find({ type: "BOT" })
+        const users = await User.find({ role: "BOT" })
         console.log(users)
         BOTS.forEach(bot =>
             this.placeBet(
