@@ -34,9 +34,8 @@ class Game {
     }
 
     async createBots() {
-        const users = await User.find({ role: "BOT" })
-        console.log(users)
-        BOTS.forEach(bot =>
+        const bots = await User.find({ role: "BOT" })
+        bots.forEach(bot =>
             this.placeBet(
                 bot,
                 Math.floor(Math.random() * 10),
@@ -50,7 +49,11 @@ class Game {
             console.log(`Cannot bet in ${this._state}`)
             return
         }
-        this._players[user._id] = { ...user, betAmount, prediction }
+        this._players[user._id] = {
+            username: user.username,
+            betAmount,
+            prediction,
+        }
     }
 
     calculateResult() {
