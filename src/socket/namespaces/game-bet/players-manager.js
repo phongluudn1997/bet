@@ -1,6 +1,5 @@
 const GamePlayer = require("../../../models/game_player")
 const GameProfit = require("../../../models/game_profit")
-const Bot = require("../../../models/bot")
 const { ProfitService } = require("../../../services")
 const { randInt } = require("../../../utils/func")
 

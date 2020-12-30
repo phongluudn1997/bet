@@ -11,7 +11,6 @@ const UserSchema = new Schema(
         timestamps: true,
     }
 )
-module.exports = model("User", UserSchema, "users")
 
 const dataMigrate = [
     {
@@ -23,3 +22,5 @@ const dataMigrate = [
 UserSchema.statics.getMigrateData = function () {
     return dataMigrate
 }
+
+module.exports = model("User", UserSchema, "users")
