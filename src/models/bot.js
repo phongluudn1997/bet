@@ -9,7 +9,6 @@ const BotSchema = new Schema(
         finances: {
             free_coin: { type: Number, default: 0 },
             net_profit: { type: Number, default: 0 },
-            gross_profit: { type: Number, default: 0 },
         },
     },
     {
