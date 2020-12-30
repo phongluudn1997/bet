@@ -11,14 +11,6 @@ const BotSchema = new Schema(
             net_profit: { type: Number, default: 0 },
             gross_profit: { type: Number, default: 0 },
         },
-        type_bot: {
-            type: String,
-            enum: ["REAL_BOT", "VIR_BOT_A", "VIR_BOT_B"],
-            required: true,
-        },
-        games: {
-            games_played: { type: Number, default: 0 },
-        },
     },
     {
         timestamps: true,
@@ -33,7 +25,6 @@ const VIR_BOTS_A = Array(ENGLISH_NAMES.length)
             net_profit: 0,
             gross_profit: 0,
         },
-        type_bot: "VIR_BOT_A",
     }))
 
 const dataMigrate = [...VIR_BOTS_A]
