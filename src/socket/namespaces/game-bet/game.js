@@ -2,7 +2,7 @@ const User = require("../../../models/user")
 const BOTS = require("./bots")
 
 class Game {
-    _result = null // 0 || 1
+    _result = 0 // 0 || 1
     _state = "IDLE" // 'IDLE' || 'BETTING' || 'RESULT_CALCULATING' || 'PAY_MONEY'
     _players = {} // {_id: {user, prediction, betAmount}}
     _timer = 0
