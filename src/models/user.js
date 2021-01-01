@@ -4,6 +4,7 @@ const UserSchema = new Schema(
     {
         username: { type: String, unique: true },
         password: { type: String },
+        coins: { type: Number },
         role: { type: String, enum: ["ADMIN", "USER", "BOT"], default: "USER" },
         email: { type: String },
     },
@@ -16,6 +17,7 @@ const dataMigrate = [
     {
         username: "Bot1",
         role: "BOT",
+        coins: 100000,
     },
 ]
 

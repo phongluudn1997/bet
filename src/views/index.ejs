@@ -56,12 +56,15 @@
                     addToList(`${tick} ${state}`)
                 )
                 socket.on("game-stopped", () => addToList("Game stopped"))
-                socket.on("game-result", ({ winners, losers }) =>
+                socket.on("game-result", ({ winners, losers, result }) =>
                     addToList(
-                        `Winners: ${JSON.stringify(
+                        `Game result: ${result}, Winners: ${JSON.stringify(
                             winners
                         )}, Losers: ${JSON.stringify(losers)}`
                     )
+                )
+                socket.on("payment-required", ({ message }) =>
+                    addToList(message)
                 )
             </script>
         </body>
